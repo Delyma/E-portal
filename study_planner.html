@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Planner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2em;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .view-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .view-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Calendar Section */
+        .calendar-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header h2 {
+            color: #333;
+            font-size: 1.5em;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-nav button {
+            padding: 8px 15px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav button:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        /* Weekly Calendar */
+        .weekly-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .day-cell {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 120px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .day-cell:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .day-cell.today {
+            background: #e8eaf6;
+            border-color: #667eea;
+        }
+
+        .day-label {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .day-date {
+            color: #333;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .day-sessions {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .session-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            margin: 2px 0;
+            border-radius: 4px;
+            font-size: 0.75em;
+            color: white;
+            margin-right: 5px;
+        }
+
+        /* Add Session Form */
+        .add-session-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-session-section h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        /* Sessions List */
+        .sessions-section {
+            margin-top: 30px;
+        }
+
+        .sessions-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .session-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .session-card {
+            background: white;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .session-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .session-subject {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .priority-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: white;
+        }
+
+        .priority-high {
+            background: #ff6b6b;
+        }
+
+        .priority-medium {
+            background: #ffd93d;
+            color: #333;
+        }
+
+        .priority-low {
+            background: #6bcf7f;
+        }
+
+        .session-topic {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .session-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-edit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #764ba2;
+        }
+
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #ff5252;
+        }
+
+        .notification-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .toggle-switch {
+            width: 40px;
+            height: 24px;
+            background: #ccc;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #667eea;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            left: 18px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .weekly-calendar {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .weekly-calendar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .session-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .weekly-calendar {
+                grid-template-columns: 1fr;
+            }
+
+            .day-cell {
+                min-height: 80px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+
+        .subject-color-math { border-left-color: #667eea; }
+        .subject-color-physics { border-left-color: #ff6b6b; }
+        .subject-color-chemistry { border-left-color: #6bcf7f; }
+        .subject-color-english { border-left-color: #ffd93d; }
+        .subject-color-history { border-left-color: #a569bd; }
+        .subject-color-cs { border-left-color: #00bcd4; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📅 Study Planner</h1>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="weekly">Weekly</button>
+                <button class="view-btn" data-view="monthly">Monthly</button>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Calendar Section -->
+            <div class="calendar-section">
+                <div class="calendar-header">
+                    <h2 id="calendarTitle">Week of Dec 9, 2025</h2>
+                    <div class="calendar-nav">
+                        <button id="prevBtn">← Previous</button>
+                        <button id="todayBtn">Today</button>
+                        <button id="nextBtn">Next →</button>
+                    </div>
+                </div>
+
+                <div class="weekly-calendar" id="weeklyCalendar"></div>
+            </div>
+
+            <!-- Add Session Form -->
+            <div class="add-session-section">
+                <h3>➕ Add Session</h3>
+                <form id="sessionForm">
+                    <div class="form-group">
+                        <label for="subject">Subject</label>
+                        <select id="subject" required>
+                            <option value="">Select Subject</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="English">English</option>
+                            <option value="History">History</option>
+                            <option value="Computer Science">Computer Science</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="topic">Topic</label>
+                        <input type="text" id="topic" placeholder="e.g., Calculus Basics" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="date">Date</label>
+                        <input type="date" id="date" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="time">Time</label>
+                            <input type="time" id="time" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="duration">Duration (mins)</label>
+                            <input type="number" id="duration" placeholder="60" min="15" max="480" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="priority">Priority</label>
+                            <select id="priority" required>
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="reminder">
+                                <label for="reminder" style="margin: 0;">Enable Reminder</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes (optional)</label>
+                        <textarea id="notes" placeholder="Add any notes..." rows="3"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Add Session</button>
+                        <button type="reset" class="btn btn-secondary">Clear</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sessions List -->
+        <div class="sessions-section">
+            <h2>Study Sessions</h2>
+            <div class="tabs">
+                <button class="tab active" data-filter="all">All Sessions</button>
+                <button class="tab" data-filter="pending">Pending</button>
+                <button class="tab" data-filter="completed">Completed</button>
+            </div>
+            <div class="session-list" id="sessionList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Color mapping
+        const subjectColors = {
+            'Mathematics': 'math',
+            'Physics': 'physics',
+            'Chemistry': 'chemistry',
+            'English': 'english',
+            'History': 'history',
+            'Computer Science': 'cs'
+        };
+
+        // Sessions storage
+        let sessions = JSON.parse(localStorage.getItem('sessions')) || [];
+        let currentFilter = 'all';
+        let currentDate = new Date();
+        let viewMode = 'weekly';
+
+        // Set today's date as default
+        document.getElementById('date').valueAsDate = new Date();
+
+        // Calendar functions
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diff = d.getDate() - day;
+            return new Date(d.setDate(diff));
+        }
+
+        function renderWeekly() {
+            const weekStart = getWeekStart(currentDate);
+            const calendar = document.getElementById('weeklyCalendar');
+            calendar.innerHTML = '';
+
+            const monthYear = weekStart.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            document.getElementById('calendarTitle').textContent = `Week of ${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, ${weekStart.getFullYear()}`;
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(weekStart);
+                date.setDate(date.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+                const dayNum = date.getDate();
+
+                const daySessions = sessions.filter(s => s.date === dateStr);
+                const isToday = dateStr === new Date().toISOString().split('T')[0];
+
+                const cell = document.createElement('div');
+                cell.className = `day-cell ${isToday ? 'today' : ''}`;
+                cell.innerHTML = `
+                    <div class="day-label">${dayName}</div>
+                    <div class="day-date">${dayNum}</div>
+                    <div class="day-sessions">
+                        ${daySessions.map(s => `<div class="session-badge" style="background: var(--${subjectColors[s.subject] || 'default'}-color);">${s.subject.substring(0, 3)}</div>`).join('')}
+                    </div>
+                `;
+                calendar.appendChild(cell);
+            }
+        }
+
+        function renderSessions() {
+            const sessionList = document.getElementById('sessionList');
+            let filtered = sessions;
+
+            if (currentFilter === 'pending') {
+                filtered = sessions.filter(s => !s.completed);
+            } else if (currentFilter === 'completed') {
+                filtered = sessions.filter(s => s.completed);
+            }
+
+            if (filtered.length === 0) {
+                sessionList.innerHTML = '<div class="empty-state"><p>No sessions yet. Create one to get started!</p></div>';
+                return;
+            }
+
+            sessionList.innerHTML = filtered.map((session, index) => `
+                <div class="session-card subject-color-${subjectColors[session.subject] || 'default'}">
+                    <div class="session-header">
+                        <div class="session-subject">${session.subject}</div>
+                        <div class="priority-badge priority-${session.priority.toLowerCase()}">${session.priority}</div>
+                    </div>
+                    <div class="session-topic">${session.topic}</div>
+                    <div class="session-meta">
+                        <span>📅 ${new Date(session.date).toLocaleDateString()}</span>
+                        <span>⏱️ ${session.duration} min</span>
+                    </div>
+                    <div class="session-meta" style="margin-bottom: 0;">
+                        <span>🕐 ${session.time}</span>
+                        <span ${session.completed ? 'style="color: #6bcf7f;"' : ''}>✓ ${session.completed ? 'Completed' : 'Pending'}</span>
+                    </div>
+                    ${session.notes ? `<div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #e0e0e0; color: #666; font-size: 0.9em;">📝 ${session.notes}</div>` : ''}
+                    <div class="notification-toggle">
+                        <span style="font-size: 0.9em; color: #666;">🔔 Reminder</span>
+                        <div class="toggle-switch ${session.reminder ? 'active' : ''}" onclick="toggleReminder(${index})"></div>
+                    </div>
+                    <div class="session-actions" style="margin-top: 15px;">
+                        <button class="btn-small btn-edit" onclick="editSession(${index})">Edit</button>
+                        <button class="btn-small" style="background: #6bcf7f; color: white;" onclick="toggleComplete(${index})">${session.completed ? 'Undo' : 'Done'}</button>
+                        <button class="btn-small btn-delete" onclick="deleteSession(${index})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Form submission
+        document.getElementById('sessionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newSession = {
+                subject: document.getElementById('subject').value,
+                topic: document.getElementById('topic').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                duration: parseInt(document.getElementById('duration').value),
+                priority: document.getElementById('priority').value,
+                reminder: document.getElementById('reminder').checked,
+                notes: document.getElementById('notes').value,
+                completed: false,
+                id: Date.now()
+            };
+
+            sessions.push(newSession);
+            saveSessions();
+            document.getElementById('sessionForm').reset();
+            document.getElementById('date').valueAsDate = new Date();
+            renderAll();
+            alert('Session added successfully! ✓');
+        });
+
+        // Session actions
+        function toggleReminder(index) {
+            sessions[index].reminder = !sessions[index].reminder;
+            saveSessions();
+            renderSessions();
+        }
+
+        function toggleComplete(index) {
+            sessions[index].completed = !sessions[index].completed;
+            saveSessions();
+            renderSessions();
+        }
+
+        function deleteSession(index) {
+            if (confirm('Are you sure you want to delete this session?')) {
+                sessions.splice(index, 1);
+                saveSessions();
+                renderSessions();
+            }
+        }
+
+        function editSession(index) {
+            const session = sessions[index];
+            document.getElementById('subject').value = session.subject;
+            document.getElementById('topic').value = session.topic;
+            document.getElementById('date').value = session.date;
+            document.getElementById('time').value = session.time;
+            document.getElementById('duration').value = session.duration;
+            document.getElementById('priority').value = session.priority;
+            document.getElementById('reminder').checked = session.reminder;
+            document.getElementById('notes').value = session.notes;
+
+            deleteSession(index);
+            document.querySelector('#sessionForm button[type="submit"]').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Storage
+        function saveSessions() {
+            localStorage.setItem('sessions', JSON.stringify(sessions));
+        }
+
+        // Event listeners
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() - 7);
+            renderWeekly();
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            currentDate.setDate(currentDate.getDate() + 7);
+            renderWeekly();
+        });
+
+        document.getElementById('todayBtn').addEventListener('click', () => {
+            currentDate = new Date();
+            renderWeekly();
+        });
+
+        document.querySelectorAll('[data-view]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-view]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                viewMode = btn.dataset.view;
+            });
+        });
+
+        document.querySelectorAll('[data-filter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilter = btn.dataset.filter;
+                renderSessions();
+            });
+        });
+
+        // Initialize
+        function renderAll() {
+            renderWeekly();
+            renderSessions();
+        }
+
+        renderAll();
+    </script>
+</body>
+</html>
